@@ -1,40 +1,7 @@
 from flask import Flask, request, redirect, render_template, session, flash, make_response
-from flask_sqlalchemy import SQLAlchemy
-
-app = Flask(__name__)
-app.config['DEBUG'] = True
-
-# Note: the connection string after :// contains the following info:
-# user:password@server:portNumber/databaseName
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://build-a-blog:moopoo@localhost:8889/build-a-blog'
-app.config['SQLALCHEMY_ECHO'] = True
-db = SQLAlchemy(app)
-# Secret keys should not be out here. But for simplicity it will stay.
-app.secret_key = 'y247kGhns&zP3B'
-
-class BlogPost(db.Model):
-
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(120))
-    body = db.Column(db.Text)
-    deleted = db.Column(db.Boolean)
-    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-
-    def __init__(self, title, body, owner):
-        self.title = title
-        self.body = body
-        self.deleted = False
-        self.owner = owner
-
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True)
-    password = db.Column(db.String(120))
-    posts = db.relationship('BlogPost', backref='owner')
-
-    def __init__(self, email, password):
-        self.email = email
-        self.password = password
+import cgi
+from app import app, db
+from models import User, Movie
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
