@@ -2,6 +2,7 @@ from flask import Flask, request, redirect, render_template, session, flash, mak
 import cgi
 from app import app, db
 from models import *
+from hashutils import check_pw_hash
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
@@ -24,13 +25,12 @@ def register():
         username = request.form['username']
         password = request.form['password']
         verify = request.form['verify']
-        list_users = User.query.filter_by(username='username')
 
         if password != verify:
             flash("""Your passwords don't match. Please try again""")
             return redirect('/register')
 
-        elif username in list_users:
+        elif username in User.query.filter_by(username='username'):
             flash("""Your username is previously registered. Please sign in.""")
             return redirect('/register')
 
