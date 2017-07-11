@@ -17,10 +17,10 @@ class BlogPost(db.Model):
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True)
+    username = db.Column(db.String(120), unique=True)
     pw_hash = db.Column(db.String(120))
     posts = db.relationship('BlogPost', backref='owner')
 
-    def __init__(self, email, password):
-        self.email = email
+    def __init__(self, username, password):
+        self.username = username
         self.password = make_pw_hash(password)

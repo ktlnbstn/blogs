@@ -1,16 +1,16 @@
 from flask import Flask, request, redirect, render_template, session, flash, make_response
 import cgi
 from app import app, db
-from models import User, Movie
+from models import *
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     if request.method == 'POST':
-        email = request.form['email']
+        username = request.form['username']
         password = request.form['password']
-        user = User.query.filter_by(email=email).first()
-        if user and user.password == password:
-            session['email'] = email
+        user = User.query.filter_by(username=username).first()
+        if user and check_pw_hash(password, user.pw_hash):
+            session['username'] = username
             flash('Logged In')
             return redirect('/blog')
         else:
@@ -21,35 +21,36 @@ def login():
 @app.route('/register', methods=['POST', 'GET'])
 def register():
     if request.method == 'POST':
-        email = request.form['email']
+        username = request.form['username']
         password = request.form['password']
         verify = request.form['verify']
+        list_users = User.query.filter_by(username='username')
 
         if password != verify:
             flash("""Your passwords don't match. Please try again""")
             return redirect('/register')
 
-        elif email in User.query.filter_by(email='email'):
-            flash("""Your email is previously registered. Please sign in.""")
+        elif username in list_users:
+            flash("""Your username is previously registered. Please sign in.""")
             return redirect('/register')
 
         else:
-            new_user = User(email=email, password=password)
+            new_user = User(username=username, password=password)
             db.session.add(new_user)
             db.session.commit()
-            session['email'] = email
+            session['username'] = username
             return redirect('/blog')
 
     return render_template('register.html')
 
 @app.route('/logout')
 def logout():
-    session.pop('email', None)
+    session.pop('username', None)
     return redirect('/login')
 
 @app.route('/blog')
 def index():
-    owner = User.query.filter_by(email=session['email']).first()
+    owner = User.query.filter_by(username=session['username']).first()
     posts = BlogPost.query.filter_by(deleted=False, owner=owner).all()
     diff = request.args.get('id')
 
@@ -62,7 +63,7 @@ def index():
 @app.route('/newpost', methods=['POST', 'GET'])
 def add_post():
     if request.method == 'POST':
-        owner = User.query.filter_by(email=session['email']).first()
+        owner = User.query.filter_by(username=session['username']).first()
         blog_name = request.form['title']
         post_body = request.form['post']
 
@@ -94,7 +95,7 @@ def delete_post():
 @app.before_request
 def require_login():
     allowed_routes = ['login', 'register']
-    if request.endpoint not in allowed_routes and 'email' not in session:
+    if request.endpoint not in allowed_routes and 'username' not in session:
         return redirect('/login')
 
 if __name__ == '__main__':
