@@ -13,7 +13,7 @@ def login():
         if user and check_pw_hash(password, user.pw_hash):
             session['username'] = username
             flash('Logged In')
-            return redirect('/blog')
+            return redirect('/newpost')
         else:
             flash('User password incorrect or user does not exist', 'error')
 
