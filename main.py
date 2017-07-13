@@ -48,17 +48,21 @@ def register():
             return redirect('/signup')
 
         # if the user attempts to register a previously registered username, notify
-        if username not in User.query.filter_by(username=username).all():
-            flash("""Your username is previously registered. Please sign in or create a new username.""")
-            return redirect('/signup')
-
-        # if everything checks out, commit a user object
         else:
-            new_user = User(username=username, password=password)
-            db.session.add(new_user)
-            db.session.commit()
-            session['username'] = username
-            return redirect('/newpost')
+            # if username present, value = True. If unique, value = False.
+            listed_users = User.query.filter_by(username=username).first()
+
+            if listed_users:
+                flash("""Your username is previously registered. Please sign in or create a new username.""")
+                return redirect('/signup')
+
+            # if everything checks out, commit a user object
+            else:
+                new_user = User(username=username, password=password)
+                db.session.add(new_user)
+                db.session.commit()
+                session['username'] = usernamed
+                return redirect('/newpost')
 
     return render_template('register.html')
 
