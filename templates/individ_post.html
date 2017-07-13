@@ -2,5 +2,6 @@
 
 {% block content %}
   <h2><center>{{ post.title }}</center></h2>
+    <p><center>By: <a id="duff" href="./blog?user={{post.id}}">{{ post.owner.username }}</a></center></p>
     <p>{{ post.body }}</p>
 {% endblock %}

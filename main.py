@@ -48,8 +48,8 @@ def register():
             return redirect('/signup')
 
         # if the user attempts to register a previously registered username, notify
-        if username in User.query.filter_by(username='username'):
-            flash("""Your username is previously registered. Please sign in.""")
+        if username not in User.query.filter_by(username=username).all():
+            flash("""Your username is previously registered. Please sign in or create a new username.""")
             return redirect('/signup')
 
         # if everything checks out, commit a user object
@@ -67,18 +67,37 @@ def logout():
     session.pop('username', None)
     return redirect('/blog')
 
-@app.route('/blog')
+@app.route('/')
 def index():
-    # only display the logged in user's posts
-    owner = User.query.filter_by(username=session['username']).first()
-    posts = BlogPost.query.filter_by(deleted=False, owner=owner).all()
-    diff = request.args.get('id')
+    # display/link to all author usernames
+    authors = User.query.filter_by().all()
+    diff = request.args.get('user')
 
+    if diff:
+        author_posts = BlogPost.query.filter_by(deleted=False, owner_id=diff).all()
+        return render_template('singleUser.html', posts=author_posts)
+
+    return render_template('index.html', authors=authors)
+
+@app.route('/blog')
+def index_all():
+    # display all posts
+    posts = BlogPost.query.filter_by(deleted=False).all()
+    diff = request.args.get('id')
+    duff = request.args.get('user')
+
+    # if you want to see one blog post, click on post title
     if diff:
         post = BlogPost.query.filter_by(id=diff).first()
         return render_template('individ_post.html', post=post)
 
+    # if you want to see more by an author, click on username
+    if duff:
+        author_posts = BlogPost.query.filter_by(owner_id=duff).all()
+        return render_template('singleUser.html', posts=author_posts)
+
     return render_template('blog.html', posts=posts)
+
 
 @app.route('/newpost', methods=['POST', 'GET'])
 def add_post():
@@ -121,7 +140,7 @@ def delete_post():
 @app.before_request
 def require_login():
     # require a login to create a blog
-    allowed_routes = ['login', 'index', 'register']
+    allowed_routes = ['login', 'index', 'index_all', 'register']
     if request.endpoint not in allowed_routes and 'username' not in session:
         return redirect('/login')
 

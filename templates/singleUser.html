@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <ul>
+    {% for post in posts %}
+      <li>
+        <h2><a id="diff" href="./blog?id={{post.id}}">{{ post.title }}</a></h2>
+        <p><h5>By: {{ post.owner.username }}</a></h5></p>
+        <p>{{ post.body }}</p>
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}

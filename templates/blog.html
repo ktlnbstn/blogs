@@ -5,8 +5,9 @@
     <ul>
       {% for post in posts %}
         <li>
-          <h4><a id="post_diff" href="./blog?id={{post.id}}">{{ post.title }}</a></h4>
+          <h4><a id="diff" href="./blog?id={{post.id}}">{{ post.title }}</a></h4>
             <p>{{ post.body }}</p>
+            <p><h5>Written by: <a id="duff" href="./blog?user={{post.owner_id}}">{{ post.owner.username }}</a></h5></p>
               <form method="POST" action="/delete-post" style="display:inline-block;">
                   <input type="hidden" name="post-id" value="{{post.id}}">
                   <input type="submit" value="Delete Post">
